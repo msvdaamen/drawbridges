@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "name": "drawbridge",
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "drawbridges:drawbridge_advanced"
+        }
+      ]
+    }
+  ]
+}
