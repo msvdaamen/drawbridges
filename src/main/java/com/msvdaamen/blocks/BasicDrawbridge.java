@@ -109,7 +109,6 @@ public abstract class BasicDrawbridge extends Block {
         if (entity != null) {
             world.setBlockState(pos, state.with(BlockStateProperties.FACING, getFacingFromEntity(pos, entity)).with(BlockStateProperties.POWERED, false), 2);
         }
-        world.getPendingBlockTicks().scheduleTick(pos, this, this.tickRate(world));
     }
 
     public static Direction getFacingFromEntity(BlockPos clickedBlock, LivingEntity entity) {
@@ -125,16 +124,6 @@ public abstract class BasicDrawbridge extends Block {
     @Override
     public boolean ticksRandomly(BlockState state) {
         return false;
-    }
-
-    abstract void handleTick(ServerWorld world, BlockPos pos, BlockState state);
-
-    @Deprecated
-    public void tick(BlockState state, ServerWorld world, BlockPos pos, Random rand) {
-        if(!world.isRemote) {
-            handleTick(world, pos, state);
-        }
-        world.getPendingBlockTicks().scheduleTick(pos, this, this.tickRate(world));
     }
 
 

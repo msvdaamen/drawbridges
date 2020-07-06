@@ -29,6 +29,7 @@ public class DrawbridgeTileEntity extends BasicDrawbridgeTileEntity {
 
     private LazyOptional<IItemHandler> handler = LazyOptional.of(this::createHandler);
     public static final int SIZE = 2;
+    private static int timer = 20;
     private int blocksPlaced = 0;
     private int maxBlocks = 16;
     private ItemStack placedBlock = ItemStack.EMPTY;
@@ -156,7 +157,23 @@ public class DrawbridgeTileEntity extends BasicDrawbridgeTileEntity {
         return handler.orElseThrow(RuntimeException::new);
     }
 
-    public boolean removeBlock() {
+    @Override
+    public void tick() {
+        if (getWorld().isRemote()) {
+            return;
+        }
+        if (timer == 0) {
+            timer = 20;
+            if (getBlockState().get(BlockStateProperties.POWERED)) {
+                extend();
+            } else {
+                retract();
+            }
+        }
+        timer--;
+    }
+
+    public boolean retract() {
         if (!hasBlocksPlaced()) {
             return false;
         }
@@ -183,13 +200,13 @@ public class DrawbridgeTileEntity extends BasicDrawbridgeTileEntity {
             return false;
         }
         blocksPlaced = offset;
-        getWorld().setBlockState(pos, Blocks.AIR.getDefaultState());
+        getWorld().setBlockState(pos, Blocks.AIR.getDefaultState(), 2);
         removeBlocksPlaced();
         this.addItemToInv();
         return true;
     }
 
-    public boolean placeBlock() {
+    public boolean extend() {
         if (this.hasMaxedPlaced()) {
             return false;
         }
@@ -198,25 +215,31 @@ public class DrawbridgeTileEntity extends BasicDrawbridgeTileEntity {
             return false;
         }
         Direction dir = getBlockState().get(BlockStateProperties.FACING);
-
-        int offset = 1;
-        for(int i = 1; i <= (blocksPlaced + 1); i++) {
-            BlockPos pos = getPos().offset(dir, i);
-            BlockState state = getWorld().getBlockState(pos);
-            if (state.isAir(getWorld(), pos) || !state.getBlock().equals(Block.getBlockFromItem(placedBlock.getItem()))) {
-                offset = i;
-               break;
-            }
-            offset = i;
-        }
-        BlockPos pos = getPos().offset(dir, offset);
+        BlockPos pos = getPlacePosition(dir);
         if (!getWorld().getBlockState(pos).isAir(getWorld(), pos) || !placeBlockState.isValidPosition(getWorld(), pos)) {
             return false;
         }
-        getWorld().setBlockState(pos, placeBlockState);
-        blocksPlaced = offset;
+        getWorld().setBlockState(pos, placeBlockState, 2);
+        blocksPlaced = blocksPlaced++;
         this.removeFromInv();
         return true;
+    }
+
+    private BlockPos getPlacePosition(Direction dir) {
+        for(int i = 1; i <= (blocksPlaced + 1); i++) {
+            BlockPos pos = getPos().offset(dir, i);
+            BlockState state = getWorld().getBlockState(pos);
+            if (!state.isValidPosition(getWorld(), pos)) {
+                return null;
+            }
+            if (state.isAir(getWorld(), pos)) {
+                return pos;
+            }
+            if (!state.getBlock().equals(Block.getBlockFromItem(placedBlock.getItem()))) {
+                return null;
+            }
+        }
+        return null;
     }
 
     private BlockState getPlaceBlockState() {

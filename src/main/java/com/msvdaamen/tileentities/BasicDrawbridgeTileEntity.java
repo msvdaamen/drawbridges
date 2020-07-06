@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
+import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.text.ITextComponent;
@@ -19,7 +20,7 @@ import net.minecraftforge.common.util.Constants;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public abstract class BasicDrawbridgeTileEntity extends TileEntity implements INamedContainerProvider {
+public abstract class BasicDrawbridgeTileEntity extends TileEntity implements ITickableTileEntity, INamedContainerProvider {
 
     public static final ModelProperty<BlockState> CAMO = new ModelProperty<>();
 
@@ -47,6 +48,7 @@ public abstract class BasicDrawbridgeTileEntity extends TileEntity implements IN
         }
         return tag;
     }
+
 
     @Nullable
     @Override

@@ -19,4 +19,9 @@ public class DrawbridgeAdvancedTileEntity extends BasicDrawbridgeTileEntity {
     public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
         return new DrawbridgeAdvancedContainer(i, world, pos, playerInventory, playerEntity);
     }
+
+    @Override
+    public void tick() {
+
+    }
 }

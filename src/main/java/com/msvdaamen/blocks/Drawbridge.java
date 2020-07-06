@@ -21,15 +21,14 @@ public class Drawbridge extends BasicDrawbridge {
         super();
     }
 
-    @Override
     void handleTick(ServerWorld world, BlockPos pos, BlockState state) {
         if (world.getTileEntity(pos) instanceof DrawbridgeTileEntity) {
             DrawbridgeTileEntity tile = (DrawbridgeTileEntity) world.getTileEntity(pos);
 
             if (state.get(BlockStateProperties.POWERED)) {
-                tile.placeBlock();
+                tile.extend();
             } else {
-                tile.removeBlock();
+                tile.retract();
             }
 
         }
@@ -67,12 +66,6 @@ public class Drawbridge extends BasicDrawbridge {
     public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos,
                                         ISelectionContext context) {
         return generatedShape(worldIn, pos);
-    }
-
-
-    @Override
-    public int tickRate(IWorldReader worldIn) {
-        return 20;
     }
 
     public void onBlockAdded(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving) {
