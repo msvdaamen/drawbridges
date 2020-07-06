@@ -49,9 +49,6 @@ public class DrawbridgeBakedModel implements IDynamicBakedModel {
 
         BlockState camo = extraData.getData(DrawbridgeTileEntity.CAMO);
         if (camo != null && !(camo.getBlock() instanceof Drawbridge)) {
-            if (camo.equals(Blocks.GRASS_BLOCK.getDefaultState())) {
-                Drawbridges.LOGGER.info(camo);
-            }
             ModelResourceLocation location = BlockModelShapes.getModelLocation(camo);
             if (location != null) {
                 IBakedModel model = Minecraft.getInstance().getModelManager().getModel(location);

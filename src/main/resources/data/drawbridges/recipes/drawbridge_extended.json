@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "gsg",
+    "rdr",
+    "gsg"
+  ],
+  "key": {
+    "g": {
+      "item": "minecraft:gold_ingot"
+    },
+    "r": {
+      "item": "minecraft:repeater"
+    },
+    "s": {
+      "item": "minecraft:redstone"
+    },
+    "d": {
+      "item": "drawbridges:drawbridge"
+    }
+  },
+  "result": {
+    "item": "drawbridges:drawbridge_extended"
+  }
+}

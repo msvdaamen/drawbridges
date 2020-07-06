@@ -2,6 +2,7 @@ package com.msvdaamen.client.gui.drawbridge_extended;
 
 import com.msvdaamen.client.gui.slots.CamoSlot;
 import com.msvdaamen.setup.Registration;
+import com.msvdaamen.tileentities.DrawbridgeExtendedTileEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
@@ -11,27 +12,24 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IWorldPosCallable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 import net.minecraftforge.items.wrapper.InvWrapper;
 
 public class DrawbridgeExtendedContainer extends Container {
 
-    private TileEntity tileEntity;
+    private DrawbridgeExtendedTileEntity tileEntity;
     private PlayerEntity playerEntity;
     private IItemHandler playerInventory;
 
     public DrawbridgeExtendedContainer(int windowId, World world, BlockPos pos, PlayerInventory playerInventory, PlayerEntity player) {
         super(Registration.DRAWBRIDGE_EXTENDED_CONTAINER.get(), windowId);
-        tileEntity = world.getTileEntity(pos);
+        tileEntity = (DrawbridgeExtendedTileEntity) world.getTileEntity(pos);
         this.playerEntity = player;
         this.playerInventory = new InvWrapper(playerInventory);
 
-        tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
-            addSlot(new CamoSlot(h, 0, 27, 39));
-            addSlot(new SlotItemHandler(h, 1, 80, 33));
-        });
+        addSlot(new CamoSlot(tileEntity.getItemHandler(), 0, 27, 39));
+        addSlot(new SlotItemHandler(tileEntity.getItemHandler(), 1, 80, 33));
 
         layoutPlayerInventorySlots(8, 84);
     }
@@ -73,23 +71,32 @@ public class DrawbridgeExtendedContainer extends Container {
     public ItemStack transferStackInSlot(PlayerEntity playerIn, int index) {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(index);
-        if (slot != null && slot.getHasStack()) {
-            ItemStack stack = slot.getStack();
-            itemstack = stack.copy();
 
-            if (stack.isEmpty()) {
+        if (slot != null && slot.getHasStack()) {
+            ItemStack itemstack1 = slot.getStack();
+            itemstack = itemstack1.copy();
+
+            if (index < DrawbridgeExtendedTileEntity.SIZE) {
+                if (!this.mergeItemStack(itemstack1, DrawbridgeExtendedTileEntity.SIZE, this.inventorySlots.size(), true)) {
+                    return ItemStack.EMPTY;
+                }
+            } else {
+                if (!this.mergeItemStack(itemstack1, 1, DrawbridgeExtendedTileEntity.SIZE, false)) {
+                    return ItemStack.EMPTY;
+                }
+            }
+
+            if (itemstack1.getCount() == 0) {
                 slot.putStack(ItemStack.EMPTY);
             } else {
                 slot.onSlotChanged();
             }
-
-            if (stack.getCount() == itemstack.getCount()) {
-                return ItemStack.EMPTY;
-            }
-
-            slot.onTake(playerIn, stack);
         }
 
         return itemstack;
+    }
+
+    public TileEntity getTileEntity() {
+        return tileEntity;
     }
 }

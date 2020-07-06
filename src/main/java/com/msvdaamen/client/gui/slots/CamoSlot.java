@@ -24,6 +24,7 @@ public class CamoSlot extends SlotItemHandler {
     public boolean isItemValid(@Nonnull ItemStack stack) {
         if(stack.getItem() instanceof BlockItem) {
             Block block = ((BlockItem) stack.getItem()).getBlock();
+
             if (!block.equals(Registration.DRAWBRIDGE.get()) && !block.equals(Registration.DRAWBRIDGE_EXTENDED.get()) && !block.equals(Registration.DRAWBRIDGE_ADVANCED.get())) {
                 return true;
             }

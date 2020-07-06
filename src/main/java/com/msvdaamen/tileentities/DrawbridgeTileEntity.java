@@ -7,6 +7,7 @@ import com.msvdaamen.setup.Registration;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
@@ -15,9 +16,13 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IWorldReader;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.FluidUtil;
+import net.minecraftforge.fluids.IFluidBlock;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
@@ -29,43 +34,13 @@ public class DrawbridgeTileEntity extends BasicDrawbridgeTileEntity {
 
     private LazyOptional<IItemHandler> handler = LazyOptional.of(this::createHandler);
     public static final int SIZE = 2;
-    private static int timer = 20;
+    private int timer = 20;
     private int blocksPlaced = 0;
     private int maxBlocks = 16;
     private ItemStack placedBlock = ItemStack.EMPTY;
 
     public DrawbridgeTileEntity() {
         super(Registration.DRAWBRIDGE_TILE.get());
-    }
-
-    @Nullable
-    @Override
-    public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
-        return new DrawbridgeContainer(i, world, pos, playerInventory, playerEntity);
-    }
-
-    @Override
-    public void read(CompoundNBT tag) {
-        if(tag.contains("placedBlock")) {
-            this.placedBlock = ItemStack.read(tag.getCompound("placedBlock"));
-        }
-        blocksPlaced = tag.getInt("blocksPlaced");
-        CompoundNBT invTag = tag.getCompound("inv");
-        handler.ifPresent(h -> ((INBTSerializable<CompoundNBT>) h).deserializeNBT(invTag));
-        super.read(tag);
-    }
-
-    @Override
-    public CompoundNBT write(CompoundNBT tag) {
-        if(!this.placedBlock.isEmpty()) {
-            tag.put("placedBlock", placedBlock.serializeNBT());
-        }
-        tag.putInt("blocksPlaced", blocksPlaced);
-        handler.ifPresent(h -> {
-            CompoundNBT compound = ((INBTSerializable<CompoundNBT>) h).serializeNBT();
-            tag.put("inv", compound);
-        });
-        return super.write(tag);
     }
 
     private IItemHandler createHandler() {
@@ -153,6 +128,20 @@ public class DrawbridgeTileEntity extends BasicDrawbridgeTileEntity {
 //        return super.getCapability(cap, side);
 //    }
 
+    public void syncTimer(World world, BlockPos pos, Direction facing) {
+        for(Direction dir: Direction.values()) {
+            if (world.getTileEntity(pos.offset(dir)) instanceof DrawbridgeTileEntity) {
+                DrawbridgeTileEntity tile = (DrawbridgeTileEntity) world.getTileEntity(pos.offset(dir));
+                this.setTimer(tile.getTimer());
+                break;
+            }
+        }
+
+//        if (world.getBlockState(neighbor).getBlock().equals(getBlockState().getBlock())) {
+//
+//        }
+    }
+
     public IItemHandler getItemHandler() {
         return handler.orElseThrow(RuntimeException::new);
     }
@@ -200,9 +189,9 @@ public class DrawbridgeTileEntity extends BasicDrawbridgeTileEntity {
             return false;
         }
         blocksPlaced = offset;
-        getWorld().setBlockState(pos, Blocks.AIR.getDefaultState(), 2);
+        getWorld().setBlockState(pos, Blocks.AIR.getDefaultState(), 3);
         removeBlocksPlaced();
-        this.addItemToInv();
+        addItemToInv();
         return true;
     }
 
@@ -215,31 +204,65 @@ public class DrawbridgeTileEntity extends BasicDrawbridgeTileEntity {
             return false;
         }
         Direction dir = getBlockState().get(BlockStateProperties.FACING);
-        BlockPos pos = getPlacePosition(dir);
-        if (!getWorld().getBlockState(pos).isAir(getWorld(), pos) || !placeBlockState.isValidPosition(getWorld(), pos)) {
+        BlockPos pos = getExtendPosition(dir);
+        if (pos == null) {
             return false;
         }
-        getWorld().setBlockState(pos, placeBlockState, 2);
-        blocksPlaced = blocksPlaced++;
+        getWorld().setBlockState(pos, placeBlockState, 3);
+        blocksPlaced++;
         this.removeFromInv();
         return true;
     }
 
-    private BlockPos getPlacePosition(Direction dir) {
+    private BlockPos getExtendPosition(Direction dir) {
         for(int i = 1; i <= (blocksPlaced + 1); i++) {
             BlockPos pos = getPos().offset(dir, i);
             BlockState state = getWorld().getBlockState(pos);
-            if (!state.isValidPosition(getWorld(), pos)) {
-                return null;
+
+            if (state.getBlock().equals(Block.getBlockFromItem(placedBlock.getItem()))) {
+                continue;
             }
-            if (state.isAir(getWorld(), pos)) {
+            if ((state.isAir(getWorld(), pos) || isFluid(state.getBlock())) && state.isValidPosition(getWorld(), pos)) {
                 return pos;
-            }
-            if (!state.getBlock().equals(Block.getBlockFromItem(placedBlock.getItem()))) {
+            } else {
                 return null;
             }
         }
         return null;
+    }
+
+    public boolean isFluid(Block b) {
+        return b instanceof IFluidBlock || b instanceof FlowingFluidBlock;
+    }
+
+    @Nullable
+    @Override
+    public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
+        return new DrawbridgeContainer(i, world, pos, playerInventory, playerEntity);
+    }
+
+    @Override
+    public void read(CompoundNBT tag) {
+        if(tag.contains("placedBlock")) {
+            this.placedBlock = ItemStack.read(tag.getCompound("placedBlock"));
+        }
+        blocksPlaced = tag.getInt("blocksPlaced");
+        CompoundNBT invTag = tag.getCompound("inv");
+        handler.ifPresent(h -> ((INBTSerializable<CompoundNBT>) h).deserializeNBT(invTag));
+        super.read(tag);
+    }
+
+    @Override
+    public CompoundNBT write(CompoundNBT tag) {
+        if(!this.placedBlock.isEmpty()) {
+            tag.put("placedBlock", placedBlock.serializeNBT());
+        }
+        tag.putInt("blocksPlaced", blocksPlaced);
+        handler.ifPresent(h -> {
+            CompoundNBT compound = ((INBTSerializable<CompoundNBT>) h).serializeNBT();
+            tag.put("inv", compound);
+        });
+        return super.write(tag);
     }
 
     private BlockState getPlaceBlockState() {
@@ -286,4 +309,11 @@ public class DrawbridgeTileEntity extends BasicDrawbridgeTileEntity {
         return this.blocksPlaced != 0;
     }
 
+    public int getTimer() {
+        return timer;
+    }
+
+    public void setTimer(int timer) {
+        this.timer = timer;
+    }
 }

@@ -32,15 +32,14 @@ public class ClientSetup {
 //        MagicRenderer.register();
 //        MinecraftForge.EVENT_BUS.addListener(InWorldRenderer::render);
 //        MinecraftForge.EVENT_BUS.addListener(AfterLivingRenderer::render);
-        RenderTypeLookup.setRenderLayer(Registration.DRAWBRIDGE.get(), RenderType.getCutout());
 
         ModelLoader.addSpecialModel(new ResourceLocation(Drawbridges.MODID, "block/drawbridge"));
         ModelLoader.addSpecialModel(new ResourceLocation(Drawbridges.MODID, "block/drawbridge_extended"));
         ModelLoader.addSpecialModel(new ResourceLocation(Drawbridges.MODID, "block/drawbridge_advanced"));
 
-        RenderTypeLookup.setRenderLayer(Registration.DRAWBRIDGE.get(), RenderType.getCutoutMipped());
-        RenderTypeLookup.setRenderLayer(Registration.DRAWBRIDGE_EXTENDED.get(), RenderType.getCutoutMipped());
-        RenderTypeLookup.setRenderLayer(Registration.DRAWBRIDGE_ADVANCED.get(), RenderType.getCutoutMipped());
+        RenderTypeLookup.setRenderLayer(Registration.DRAWBRIDGE.get(), RenderType.getTranslucent());
+        RenderTypeLookup.setRenderLayer(Registration.DRAWBRIDGE_EXTENDED.get(), RenderType.getTranslucent());
+        RenderTypeLookup.setRenderLayer(Registration.DRAWBRIDGE_ADVANCED.get(), RenderType.getTranslucent());
     }
 
     @SubscribeEvent

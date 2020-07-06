@@ -27,10 +27,10 @@ public class DrawbridgeAdvanced extends BasicDrawbridge {
         super();
     }
 
-    @Override
-    void handleTick(ServerWorld world, BlockPos pos, BlockState state) {
-
-    }
+//    @Override
+//    void handleTick(ServerWorld world, BlockPos pos, BlockState state) {
+//
+//    }
 
     @Override
     public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
