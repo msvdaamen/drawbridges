@@ -100,6 +100,11 @@ public class Drawbridge extends BasicDrawbridge {
         }
     }
 
+    @Override
+    public void observedNeighborChange(BlockState observerState, World world, BlockPos observerPos, Block changedBlock, BlockPos changedBlockPos) {
+        Drawbridges.LOGGER.info(world.getBlockState(changedBlockPos));
+    }
+
     @Nullable
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {

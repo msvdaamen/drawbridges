@@ -108,6 +108,5 @@ public class DrawbridgeExtended extends BasicDrawbridge {
         } else {
             worldIn.setBlockState(pos, state.with(BlockStateProperties.POWERED, powered));
         }
-        Drawbridges.LOGGER.info("update state");
     }
 }

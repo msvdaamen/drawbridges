@@ -18,17 +18,24 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.event.entity.player.ArrowNockEvent;
+import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.IFluidBlock;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DrawbridgeTileEntity extends BasicDrawbridgeTileEntity {
 
@@ -128,6 +135,7 @@ public class DrawbridgeTileEntity extends BasicDrawbridgeTileEntity {
 //        return super.getCapability(cap, side);
 //    }
 
+
     public void syncTimer(World world, BlockPos pos, Direction facing) {
         for(Direction dir: Direction.values()) {
             if (world.getTileEntity(pos.offset(dir)) instanceof DrawbridgeTileEntity) {
@@ -136,10 +144,18 @@ public class DrawbridgeTileEntity extends BasicDrawbridgeTileEntity {
                 break;
             }
         }
-
-//        if (world.getBlockState(neighbor).getBlock().equals(getBlockState().getBlock())) {
 //
+//        BlockPos tempPos = getPos().offset(Direction.UP, 1);
+//        for(int x = 1; x < 2; x++) {
+//            for(int y = 1; y < 2; y++) {
+//                getWorld().setBlockState(new BlockPos(
+//                    tempPos.getX() + x,
+//                        tempPos.getY(),
+//                        tempPos.getY() + y
+//                ), Blocks.DIAMOND_BLOCK.getDefaultState());
+//            }
 //        }
+
     }
 
     public IItemHandler getItemHandler() {
@@ -189,7 +205,7 @@ public class DrawbridgeTileEntity extends BasicDrawbridgeTileEntity {
             return false;
         }
         blocksPlaced = offset;
-        getWorld().setBlockState(pos, Blocks.AIR.getDefaultState(), 3);
+        scheduleBlockPlacement(pos, Blocks.AIR.getDefaultState());
         removeBlocksPlaced();
         addItemToInv();
         return true;
@@ -208,7 +224,7 @@ public class DrawbridgeTileEntity extends BasicDrawbridgeTileEntity {
         if (pos == null) {
             return false;
         }
-        getWorld().setBlockState(pos, placeBlockState, 3);
+        scheduleBlockPlacement(pos, placeBlockState);
         blocksPlaced++;
         this.removeFromInv();
         return true;
@@ -291,6 +307,10 @@ public class DrawbridgeTileEntity extends BasicDrawbridgeTileEntity {
             return true;
         }
         return getItemHandler().getStackInSlot(0).getMaxStackSize() != getItemHandler().getStackInSlot(1).getCount();
+    }
+
+    private void scheduleBlockPlacement(BlockPos pos, BlockState state) {
+        getWorld().setBlockState(pos, state);
     }
 
     private boolean hasMaxedPlaced() {
