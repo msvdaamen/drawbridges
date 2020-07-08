@@ -4,6 +4,7 @@ import com.msvdaamen.Drawbridges;
 import com.msvdaamen.blocks.Drawbridge;
 import com.msvdaamen.client.gui.drawbridge.DrawbridgeContainer;
 import com.msvdaamen.setup.Registration;
+import com.msvdaamen.utils.Timer;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -16,26 +17,17 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.entity.player.ArrowNockEvent;
-import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.IFluidBlock;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.items.CapabilityItemHandler;
+
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.Set;
 
 public class DrawbridgeTileEntity extends BasicDrawbridgeTileEntity {
 
@@ -45,6 +37,7 @@ public class DrawbridgeTileEntity extends BasicDrawbridgeTileEntity {
     private int blocksPlaced = 0;
     private int maxBlocks = 16;
     private ItemStack placedBlock = ItemStack.EMPTY;
+//    private static final ArrayList<TaskSetBlockState> placeTasks = new ArrayList<>();
 
     public DrawbridgeTileEntity() {
         super(Registration.DRAWBRIDGE_TILE.get());
@@ -139,23 +132,13 @@ public class DrawbridgeTileEntity extends BasicDrawbridgeTileEntity {
     public void syncTimer(World world, BlockPos pos, Direction facing) {
         for(Direction dir: Direction.values()) {
             if (world.getTileEntity(pos.offset(dir)) instanceof DrawbridgeTileEntity) {
-                DrawbridgeTileEntity tile = (DrawbridgeTileEntity) world.getTileEntity(pos.offset(dir));
-                this.setTimer(tile.getTimer());
-                break;
+                if (world.getBlockState(pos.offset(dir)).get(BlockStateProperties.FACING).equals(getBlockState().get(BlockStateProperties.FACING))) {
+                    DrawbridgeTileEntity tile = (DrawbridgeTileEntity) world.getTileEntity(pos.offset(dir));
+                    this.setTimer(tile.getTimer());
+                    break;
+                }
             }
         }
-//
-//        BlockPos tempPos = getPos().offset(Direction.UP, 1);
-//        for(int x = 1; x < 2; x++) {
-//            for(int y = 1; y < 2; y++) {
-//                getWorld().setBlockState(new BlockPos(
-//                    tempPos.getX() + x,
-//                        tempPos.getY(),
-//                        tempPos.getY() + y
-//                ), Blocks.DIAMOND_BLOCK.getDefaultState());
-//            }
-//        }
-
     }
 
     public IItemHandler getItemHandler() {

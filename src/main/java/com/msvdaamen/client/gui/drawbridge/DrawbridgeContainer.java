@@ -1,6 +1,5 @@
 package com.msvdaamen.client.gui.drawbridge;
 
-import com.msvdaamen.Drawbridges;
 import com.msvdaamen.client.gui.slots.CamoSlot;
 import com.msvdaamen.setup.Registration;
 import com.msvdaamen.tileentities.DrawbridgeTileEntity;
@@ -9,16 +8,12 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.IWorldPosCallable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 import net.minecraftforge.items.wrapper.InvWrapper;
-import sun.rmi.runtime.Log;
 
 public class DrawbridgeContainer extends Container {
 

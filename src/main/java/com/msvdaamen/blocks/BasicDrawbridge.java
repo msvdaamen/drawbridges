@@ -82,18 +82,6 @@ public abstract class BasicDrawbridge extends Block {
         );
     }
 
-    @Override
-    public void onBlockHarvested(World world, BlockPos pos, BlockState state, PlayerEntity entity) {
-        super.onBlockHarvested(world, pos, state, entity);
-        if (world.getTileEntity(pos) instanceof DrawbridgeTileEntity) {
-            DrawbridgeTileEntity te = (DrawbridgeTileEntity) world.getTileEntity(pos);
-            for(int i = 0; i < DrawbridgeTileEntity.SIZE; i++) {
-                ItemStack copy = te.getItemHandler().getStackInSlot(i);
-                dropItemIntoWorld(world, pos, copy);
-            }
-        }
-    }
-
     public final void dropItemIntoWorld(World world, BlockPos pos, ItemStack item) {
         Random rand = new Random();
 

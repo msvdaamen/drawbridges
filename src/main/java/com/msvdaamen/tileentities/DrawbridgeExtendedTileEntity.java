@@ -30,7 +30,7 @@ public class DrawbridgeExtendedTileEntity extends BasicDrawbridgeTileEntity {
     public static final int SIZE = 2;
     private int timer = 20;
     private int blocksPlaced = 0;
-    private int maxBlocks = 16;
+    private int maxBlocks = 64;
     private ItemStack placedBlock = ItemStack.EMPTY;
 
     public DrawbridgeExtendedTileEntity() {

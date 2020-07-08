@@ -5,6 +5,7 @@ import com.msvdaamen.tileentities.DrawbridgeTileEntity;;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
@@ -101,8 +102,15 @@ public class Drawbridge extends BasicDrawbridge {
     }
 
     @Override
-    public void observedNeighborChange(BlockState observerState, World world, BlockPos observerPos, Block changedBlock, BlockPos changedBlockPos) {
-        Drawbridges.LOGGER.info(world.getBlockState(changedBlockPos));
+    public void onBlockHarvested(World world, BlockPos pos, BlockState state, PlayerEntity entity) {
+        super.onBlockHarvested(world, pos, state, entity);
+        if (world.getTileEntity(pos) instanceof DrawbridgeTileEntity) {
+            DrawbridgeTileEntity te = (DrawbridgeTileEntity) world.getTileEntity(pos);
+            for(int i = 0; i < DrawbridgeTileEntity.SIZE; i++) {
+                ItemStack copy = te.getItemHandler().getStackInSlot(i);
+                dropItemIntoWorld(world, pos, copy);
+            }
+        }
     }
 
     @Nullable
